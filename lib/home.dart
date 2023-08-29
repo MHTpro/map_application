@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    //get permission as soon as the app run
     getUserLocation();
     super.initState();
   }
