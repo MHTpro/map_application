@@ -52,12 +52,34 @@ class _HomePageState extends State<HomePage> {
       //zoom of map
       18.0,
     );
+
+    //for add location icon
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      //back to user location
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        onPressed: () {
+          if (userLocation != null) {
+            mapController.move(
+              //height and width of user location for map
+              LatLng(
+                userLocation!.latitude!,
+                userLocation!.longitude!,
+              ),
+              //zoom
+              18.0,
+            );
+          }
+        },
+        child: const Icon(
+          Icons.location_searching_outlined,
+        ),
+      ),
       //flutter map
       body: FlutterMap(
         mapController: mapController,
@@ -73,6 +95,26 @@ class _HomePageState extends State<HomePage> {
             //use open street map
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: "app.map.com",
+          ),
+
+          //create icon for user location
+          MarkerLayer(
+            markers: <Marker>[
+              if (userLocation != null)
+                Marker(
+                  point: LatLng(
+                    userLocation!.latitude!,
+                    userLocation!.longitude!,
+                  ),
+                  builder: (BuildContext context) {
+                    return const Icon(
+                      Icons.location_on,
+                      size: 30.0,
+                      color: Colors.red,
+                    );
+                  },
+                )
+            ],
           ),
         ],
       ),
