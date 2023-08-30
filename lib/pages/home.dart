@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:map/api/api_methods.dart';
+import 'package:google_polyline_algorithm/google_polyline_algorithm.dart';
+import 'package:map/api/extension.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +16,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   LocationData? userLocation;
   MapController mapController = MapController();
-
+  Marker? destinationMarker;
+  List<LatLng> routingPoint = [];
   @override
   void initState() {
     //get permission as soon as the app run
@@ -90,14 +94,58 @@ class _HomePageState extends State<HomePage> {
 
           //zoom the map
           zoom: 16.0,
+
+          onLongPress: (tapPosition, location) async {
+            if (userLocation == null) return;
+            //use API
+            final result = await getData(
+              LatLng(
+                userLocation!.latitude!,
+                userLocation!.longitude!,
+              ),
+              location,
+            );
+
+            //use google polyline
+            routingPoint =
+                decodePolyline(result.routes[0].overviewPolyline.points)
+                    .unpackPolyline();
+
+            setState(
+              () {
+                destinationMarker = Marker(
+                  point: location,
+                  builder: (BuildContext context) {
+                    return const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 40.0,
+                    );
+                  },
+                );
+              },
+            );
+          },
         ),
         children: <Widget>[
           TileLayer(
             //use open street map
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+
             userAgentPackageName: "app.map.com",
           ),
 
+          //rounting...
+          if (routingPoint.isNotEmpty)
+            PolylineLayer(
+              polylines: [
+                Polyline(
+                  points: routingPoint,
+                  strokeWidth: 8.0,
+                  color: Colors.deepOrange,
+                ),
+              ],
+            ),
           //create icon for user location
           MarkerLayer(
             markers: <Marker>[
@@ -109,12 +157,13 @@ class _HomePageState extends State<HomePage> {
                   ),
                   builder: (BuildContext context) {
                     return const Icon(
-                      Icons.location_on,
-                      size: 30.0,
-                      color: Colors.red,
+                      Icons.person_pin_sharp,
+                      size: 40.0,
+                      color: Colors.purple,
                     );
                   },
-                )
+                ),
+              if (destinationMarker != null) destinationMarker!,
             ],
           ),
         ],
