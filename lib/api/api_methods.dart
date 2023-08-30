@@ -20,7 +20,7 @@ Future<List<Welcome>> getAllRequest(LatLng origin, LatLng destination) async {
       "/v4/direction",
       qp,
     ),
-    headers: {"Api-Key": myApiKey},
+    headers: {"Api-Key": getKey},
   );
 
   if (respnose.statusCode == 200) {
@@ -48,7 +48,7 @@ Future<Welcome> getData(LatLng origin, LatLng destination) async {
       "/v4/direction",
       qp,
     ),
-    headers: {"Api-Key": myApiKey},
+    headers: {"Api-Key": getKey},
   );
 
   if (respnose.statusCode == 200) {
